@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import ibcLogo from "@/assets/ibc-logo.jpeg";
+import ibcLogo from "@/assets/ibc-logo-new.png";
 
 const navLinks = [
   { name: "About", href: "#about" },
@@ -54,7 +54,7 @@ const Header = () => {
             <img 
               src={ibcLogo} 
               alt="IBC Dubai Logo" 
-              className="h-14 w-auto object-contain"
+              className="h-16 md:h-20 w-auto object-contain"
             />
           </Link>
           
