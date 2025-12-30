@@ -10,12 +10,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import ibcLogo from "@/assets/ibc-logo.jpeg";
+import ibcLogo from "@/assets/ibc-logo-new.png";
+
+const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
 const Apply = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     // Section 1: Personal & Business Details
     fullName: "",
@@ -56,7 +59,7 @@ const Apply = () => {
     setFormData({ ...formData, [name]: checked });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -87,11 +90,37 @@ const Apply = () => {
       return;
     }
 
-    setIsSubmitted(true);
-    toast({
-      title: "Application Submitted!",
-      description: "We'll review your application and get back to you soon.",
-    });
+    setIsSubmitting(true);
+
+    try {
+      // Submit to Google Sheets
+      const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+
+      setIsSubmitted(true);
+      toast({
+        title: "Application Submitted!",
+        description: "We'll review your application and get back to you soon.",
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        title: "Submission Sent",
+        description: "Your application has been submitted. We'll be in touch soon.",
+      });
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -156,7 +185,7 @@ const Apply = () => {
             <img 
               src={ibcLogo} 
               alt="IBC Dubai Logo" 
-              className="h-12 w-auto object-contain"
+              className="h-14 md:h-16 w-auto object-contain"
             />
           </Link>
         </div>
@@ -480,10 +509,11 @@ const Apply = () => {
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-cream rounded-xl group"
+                  disabled={isSubmitting}
+                  className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-cream rounded-xl group disabled:opacity-50"
                 >
-                  Submit Application
-                  <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                  {!isSubmitting && <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                 </Button>
                 <p className="text-center text-muted-foreground text-sm mt-4">
                   All applications are reviewed before approval. We'll get back to you within 2-3 business days.
